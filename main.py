@@ -108,8 +108,10 @@ def main():
         image_response = save_photo_to_group_album(access_token, api_version, group_id, file_name)
         post_photo_to_wall(access_token, api_version, group_id, image_response, comment)
         print('Комикс успешно опубликован')
-    except Exception as error:
-        raise error
+    except requests.exceptions.RequestException as error:
+        print(f'Ошибка при выполнении запроса: {error}')
+    except KeyError:
+        print('Неверный формат ответа сервера')
     finally:
         os.remove('comic.png')
 
