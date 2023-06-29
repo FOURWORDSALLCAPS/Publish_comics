@@ -51,9 +51,10 @@ def save_photo_to_group_album(token, api_version, group_id, file_name):
     url = f'https://api.vk.com/method/photos.saveWallPhoto'
     response = requests.post(url, params=params)
     response.raise_for_status()
-    check_vk_response(response.json())
+    server_response = response.json()
+    check_vk_response(server_response)
 
-    return response.json()
+    return server_response
 
 
 def post_photo_to_wall(token, api_version, group_id, upload_result, comment):
