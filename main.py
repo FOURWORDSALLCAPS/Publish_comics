@@ -5,6 +5,12 @@ import random
 from environs import Env
 
 
+def check_vk_response(response):
+    if 'error' in response:
+        error_msg = response['error']['error_msg']
+        raise requests.HTTPError(error_msg)
+
+
 def get_wall_upload_server(token, api_version, group_id):
     params = {
         'access_token': token,
@@ -15,6 +21,8 @@ def get_wall_upload_server(token, api_version, group_id):
     response = requests.get(url, params=params)
     response.raise_for_status()
     server_response = response.json()
+    check_vk_response(server_response)
+
     return server_response
 
 
@@ -29,6 +37,8 @@ def save_photo_to_group_album(token, api_version, group_id, file_name):
         response.raise_for_status()
         server_response = response.json()
 
+    check_vk_response(server_response)
+
     params = {
         'access_token': token,
         'v': api_version,
@@ -40,6 +50,8 @@ def save_photo_to_group_album(token, api_version, group_id, file_name):
 
     url = f'https://api.vk.com/method/photos.saveWallPhoto'
     response = requests.post(url, params=params)
+    response.raise_for_status()
+    check_vk_response(response.json())
 
     return response.json()
 
@@ -57,6 +69,8 @@ def post_photo_to_wall(token, api_version, group_id, upload_result, comment):
     url = f'https://api.vk.com/method/wall.post'
     response = requests.post(url, data=params)
     response.raise_for_status()
+
+    check_vk_response(response.json())
 
 
 def download_comic(comic_number):
@@ -85,13 +99,16 @@ def main():
         response = requests.get(url)
         response.raise_for_status()
         server_response = response.json()
+        check_vk_response(server_response)
+
         pages_number = server_response['num']
         comic_number = random.randint(1, pages_number)
         comment = download_comic(comic_number)['alt']
         image_response = save_photo_to_group_album(access_token, api_version, group_id, file_name)
         post_photo_to_wall(access_token, api_version, group_id, image_response, comment)
-    except Exception as e:
-        raise e
+        print('Комикс успешно опубликован')
+    except Exception as error:
+        raise error
     finally:
         os.remove('comic.png')
 
