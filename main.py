@@ -34,8 +34,8 @@ def save_photo_to_group_album(token, api_version, group_id, file_name):
     with open(file_name, 'rb') as file:
         files = {'photo': file}
         response = requests.post(upload_url, files=files)
-        response.raise_for_status()
-        server_response = response.json()
+    response.raise_for_status()
+    server_response = response.json()
 
     check_vk_response(server_response)
 
