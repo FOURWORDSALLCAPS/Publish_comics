@@ -14,32 +14,32 @@ def get_wall_upload_server(token, api_version, group_id):
     url = f'https://api.vk.com/method/photos.getWallUploadServer'
     response = requests.get(url, params=params)
     if response.ok:
-        upload_data = response.json()
-        return upload_data
+        server_response = response.json()
+        return server_response
     else:
         print('Не удалось получить данные из VK API')
 
 
-def save_photo_to_group_album(token, api_version, group_id, photo_path):
-    upload_data = get_wall_upload_server(token, api_version, group_id)
+def save_photo_to_group_album(token, api_version, group_id, file_name):
+    server_response = get_wall_upload_server(token, api_version, group_id)
 
-    upload_url = upload_data.get('response', {}).get('upload_url')
+    upload_url = server_response.get('response', {}).get('upload_url')
 
     if not upload_url:
         print(f'Не удалось получить URL загрузки')
 
-    files = {'photo': open(photo_path, 'rb')}
+    files = {'photo': open(file_name, 'rb')}
     response = requests.post(upload_url, files=files)
 
     if response.ok:
-        upload_result = response.json()
+        server_response = response.json()
         params = {
             'access_token': token,
             'v': api_version,
             'group_id': group_id,
-            'server': upload_result['server'],
-            'photo': upload_result['photo'],
-            'hash': upload_result['hash']
+            'server': server_response['server'],
+            'photo': server_response['photo'],
+            'hash': server_response['hash']
         }
 
         url = f'https://api.vk.com/method/photos.saveWallPhoto'
@@ -94,7 +94,7 @@ def main():
     access_token = env('VK_ACCESS_TOKEN')
     api_version = '5.131'
     group_id = env('VK_GROUP_ID')
-    image_path = 'comic.png'
+    file_name = 'comic.png'
     url = f'https://xkcd.com/info.0.json'
     response = requests.get(url)
     if response.ok:
@@ -102,8 +102,8 @@ def main():
         pages_number = server_response['num']
         comic_number = random.randint(1, pages_number)
         comment = download_comic(comic_number)['alt']
-        upload_result = save_photo_to_group_album(access_token, api_version, group_id, image_path)
-        post_photo_to_wall(access_token, api_version, group_id, upload_result, comment)
+        image_response = save_photo_to_group_album(access_token, api_version, group_id, file_name)
+        post_photo_to_wall(access_token, api_version, group_id, image_response, comment)
         os.remove('comic.png')
 
 
