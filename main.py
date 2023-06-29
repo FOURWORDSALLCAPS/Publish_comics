@@ -6,8 +6,13 @@ from environs import Env
 
 
 def get_wall_upload_server(token, api_version, group_id):
-    url = f'https://api.vk.com/method/photos.getWallUploadServer?access_token={token}&v={api_version}&group_id={group_id}'
-    response = requests.get(url)
+    params = {
+        'access_token': token,
+        'v': api_version,
+        'group_id': group_id,
+    }
+    url = f'https://api.vk.com/method/photos.getWallUploadServer'
+    response = requests.get(url, params=params)
     if response.ok:
         upload_data = response.json()
         return upload_data
@@ -38,7 +43,7 @@ def save_photo_to_group_album(token, api_version, group_id, photo_path):
         }
 
         url = f'https://api.vk.com/method/photos.saveWallPhoto'
-        response = requests.post(url, data=params)
+        response = requests.post(url, params=params)
 
         if response.ok:
             return response.json()
