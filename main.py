@@ -81,15 +81,19 @@ def main():
     group_id = env('VK_GROUP_ID')
     file_name = 'comic.png'
     url = f'https://xkcd.com/info.0.json'
-    response = requests.get(url)
-    response.raise_for_status()
-    server_response = response.json()
-    pages_number = server_response['num']
-    comic_number = random.randint(1, pages_number)
-    comment = download_comic(comic_number)['alt']
-    image_response = save_photo_to_group_album(access_token, api_version, group_id, file_name)
-    post_photo_to_wall(access_token, api_version, group_id, image_response, comment)
-    os.remove('comic.png')
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        server_response = response.json()
+        pages_number = server_response['num']
+        comic_number = random.randint(1, pages_number)
+        comment = download_comic(comic_number)['alt']
+        image_response = save_photo_to_group_album(access_token, api_version, group_id, file_name)
+        post_photo_to_wall(access_token, api_version, group_id, image_response, comment)
+    except Exception as e:
+        raise e
+    finally:
+        os.remove('comic.png')
 
 
 if __name__ == '__main__':
